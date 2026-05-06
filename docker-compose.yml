@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: invoice
+      POSTGRES_PASSWORD: invoice
+      POSTGRES_DB: invoice_engine
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U invoice -d invoice_engine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mock-psp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-psp
+    environment:
+      PSP_PORT: "4000"
+    ports:
+      - "4000:4000"
+
+  invoice-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.invoice-service
+    environment:
+      DATABASE_URL: postgres://invoice:invoice@db:5432/invoice_engine
+      PORT: "3000"
+      PSP_URL: http://mock-psp:4000
+      PSP_TIMEOUT_SECS: "10"
+      RUST_LOG: invoice_service=debug,tower_http=info
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      mock-psp:
+        condition: service_started
+
+volumes:
+  pgdata:
