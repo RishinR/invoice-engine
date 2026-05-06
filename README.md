@@ -4,7 +4,7 @@ A minimal invoice and payment service built in Rust (Axum + SQLx + PostgreSQL).
 
 ## Demo Video
 
-> _Link to be added after recording_
+[Demo video](https://drive.google.com/file/d/1qJ-EKipCGS9aN5ZJMCLmuqxAtaG1ouJp/view?usp=sharing)
 
 ---
 
